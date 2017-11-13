@@ -1,3 +1,5 @@
+library(kknn)
+
 # Calculate knearest
 knearest = function(data, k, newdata) {
   
@@ -17,8 +19,8 @@ knearest = function(data, k, newdata) {
   D=1-C
   print(D)
   for (i in 1:n2 ){
-    nearest_neighbors_indexes = order(D[,i])[1:k]
-    Prob[i] = sum(data[nearest_neighbors_indexes,p])/k
+    nearest_neighbors_indexes = order(D[,i])[1:k] # indexes of the 5 nearest
+    Prob[i] = sum(data[nearest_neighbors_indexes,p])/k # the probability of it being spam or not Ki/K
   }
   return(Prob)
 }
@@ -49,18 +51,27 @@ test = dataframe[-id,]
 # Prob
 Prob_k5 = knearest(train, 5, test)
 Prob_k1 = knearest(train, 1, test)
+Prob_k5_kknn = kknn(Spam ~ .,train=train, test=test, k=5)
 
 #confusion matrixes
-cm_k5 = table(Prob_k5>0.5, Prob_k5)
-cm_k1 = table(Prob_k1>0.5, Prob_k1)
+cm_k5 = table(Prob_k5>0.5, test[,49])
+cm_k1 = table(Prob_k1>0.5, test[,49])
+cm_k5_kknn = table(Prob_k5_kknn$fitted.values>0.5, test[,49])
 
 #missclassification rate
 mcr_k5 = 1-sum(diag(cm_k5)/sum(cm_k5))
 mcr_k1 = 1-sum(diag(cm_k1)/sum(cm_k1))
+mcr_k5_kknn = 1-sum(diag(cm_k5_kknn)/sum(cm_k5_kknn))
 
 # ROC and sensitivty
 p_seq = seq(from=0.05, to=0.95, by=0.05)
 #debugonce(ROC)
 list_result = ROC(test[,49], Prob_k5, p_seq)
 plot(x=list_result$FPR, y=list_result$TPR, xlab="FPR", ylab="TPR", xlim=c(0,1), ylim=c(0,1))
+
+############## K = 5 with kknn ##############
+
+
+
+
 

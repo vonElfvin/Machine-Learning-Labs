@@ -61,11 +61,12 @@ plot(θ, log_bayesian_model, type="l", xlim=c(0,20), ylim=c(-500, 0), main="Baye
 
 # Task 5
 # Compare new generated observations to original ones
+set.seed(12345)
 new_observations = rexp(n=50, rate = θstar_n)
 #data.frame(X, new_observations)
-hist(new_observations, col="green", xlim=c(0,5), ylim=c(0,25), main="Original observations", xlab="x")
+hist(X, col="green", xlim=c(0,6), ylim=c(0,30), main="Original observations", xlab="x")
 x11()
-hist(X, col="blue", xlim=c(0,5), ylim=c(0,25), main="New observations", xlab="x")
+hist(new_observations, col="blue", breaks=12, xlim=c(0,6), ylim=c(0,30), main="New observations", xlab="x")
 
 
 

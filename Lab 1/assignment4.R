@@ -12,9 +12,9 @@ channels = as.matrix(dataframe[1:100])
 plot(protein, moisture)
 
 # Task 2
-# M1 = B0+B1*p+ε, where ε = N~(0, σ)
-# M2 = B0+B1*p+B2*p²+ε, where ε=N~(0, σ)
-# M3 = B0+B1*p+B2*p²+B3*p³+ε, where ε=N~(0, σ)
+# M1 = w0+w1*p+ε, where ε = N~(0, σ)
+# M2 = w0+w1*p+w2*p²+ε, where ε=N~(0, σ)
+# M3 = w0+w1*p+w2*p²+w3*p³+ε, where ε=N~(0, σ)
 # etc.
 # MSE criterion is appropriate to use since it minimizes the errors in our predicions (deviation of ε)
 
@@ -77,7 +77,7 @@ mse_t4 = mean((training$Moisture-fitted_training4)^2)
 mse_t5 = mean((training$Moisture-fitted_training5)^2)
 mse_t6 = mean((training$Moisture-fitted_training6)^2)
 
-# Plot
+# MSEs for validation and training
 mse_v = c(mse_v1, mse_v2, mse_v3, mse_v4, mse_v5, mse_v6)
 mse_t = c(mse_t1, mse_t2, mse_t3, mse_t4, mse_t5, mse_t6)
 
@@ -87,23 +87,23 @@ lines(1:6, mse_t, type="l", col="blue")
 idx = !colnames(training) %in% c("Sample", "Fat", "Protein", "Moisture")
 formulax = paste("Fat~", paste(colnames(training[,idx]), collapse = "+"))
 
-#Task 4
+#Task 4 - stepAIC
 fit = lm(formula(formulax), data=dataframe)
 step = stepAIC(fit, direction="both", trace=FALSE)
 step$anova
 summary(step)
 
-# Task 5
+# Task 5 - Ridge regression
 scaled_channels = scale(dataframe[,2:101])
-scaled_fat = scale(dataframe[,102])
+scaled_fat = scale(dataframe$Fat)
 model0_ridge = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=0, family="gaussian")
 plot(model0_ridge, xvar="lambda")
 
-# Task 6
+# Task 6 - LASSO
 model0_lasso = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian")
 plot(model0_lasso, xvar="lambda")
 
-# Task 7
+# Task 7 - Cross-validation LASSO
 model0_lasso_cv = cv.glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian", lambda=seq(0,1,0.001))
 plot(model0_lasso_cv, xvar="lambda", label=TRUE)
 model0_lasso_cv$lambda.min
