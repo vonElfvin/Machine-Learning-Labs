@@ -1,15 +1,13 @@
 library(MASS)
 library(glmnet)
-
-# Task 1
+# Data
 dataframe = read.csv("tecator.csv", dec=',')
 dataframe = dataframe[-215,]
+
+# Task 1 - Plot Protein vs. Moisture
 protein = dataframe$Protein
 moisture = dataframe$Moisture
-fat = dataframe$Fat
-channels = as.matrix(dataframe[1:100])
-
-plot(protein, moisture)
+plot(protein, moisture) # Plot of protein vs. moisture, linear approximation seems reasonable (normally distributed around a line)
 
 # Task 2
 # M1 = w0+w1*p+ε, where ε = N~(0, σ)
@@ -18,56 +16,38 @@ plot(protein, moisture)
 # etc.
 # MSE criterion is appropriate to use since it minimizes the errors in our predicions (deviation of ε)
 
-# Task 3
-n = dim(dataframe)[1]
+# Task 3 - Models for different polunomial terms of powers
+n = dim(dataframe)[1] # number of observations
+set.seed(12345)
 ids = sample(1:n, floor(n/2))
 
-training = dataframe[ids,]
-validation = dataframe[-ids,]
+training = dataframe[ids,] # training data
+validation = dataframe[-ids,] # validation (test) data
 
-p = training$Protein
-p2 = p^2
-p3 = p^3
-p4 = p^4
-p5 = p^5
-p6 = p^6
-X1 = cbind(p)
-X2 = cbind(p, p2)
-X3 = cbind(p, p2, p3)
-X4 = cbind(p, p2, p3, p4)
-X5 = cbind(p, p2, p3, p4, p5)
-X6 = cbind(p, p2, p3, p4, p5, p6)
-#B = solve(t(X)%*%X)%*%t(X)%*%Y if I was to calculate it myself, did not work for higher polynomial terms of power
-M1 = lm(Moisture ~ X1, data=training)
-M2 = lm(Moisture ~ X2, data=training)
-M3 = lm(Moisture ~ X3, data=training)
-M4 = lm(Moisture ~ X4, data=training)
-M5 = lm(Moisture ~ X5, data=training)
-M6 = lm(Moisture ~ X6, data=training)
+#M = solve(t(X)%*%X)%*%t(X)%*%Y if I was to calculate it myself, did not work for higher polynomial terms of power in R
+## Create the models (Moisture vs. Protein) for the different terms of power
+M1 = lm(Moisture ~ Protein, data=training)
+M2 = lm(Moisture ~ Protein+I(Protein^2), data=training)
+M3 = lm(Moisture ~ Protein+I(Protein^2)+I(Protein^3), data=training)
+M4 = lm(Moisture ~ Protein+I(Protein^2)+I(Protein^3)+I(Protein^4), data=training)
+M5 = lm(Moisture ~ Protein+I(Protein^2)+I(Protein^3)+I(Protein^4)+I(Protein^5), data=training)
+M6 = lm(Moisture ~ Protein+I(Protein^2)+I(Protein^3)+I(Protein^4)+I(Protein^5)+I(Protein^6), data=training)
 
-# Make the predictions
-
+# Make the predictions with the given models
+fitted_training1 = M1$fitted.values
+fitted_training2 = M2$fitted.values
+fitted_training3 = M3$fitted.values
+fitted_training4 = M4$fitted.values
+fitted_training5 = M5$fitted.values
+fitted_training6 = M6$fitted.values
 fitted_validation1 = predict(M1, validation)
 fitted_validation2 = predict(M2, validation)
 fitted_validation3 = predict(M3, validation)
 fitted_validation4 = predict(M4, validation)
 fitted_validation5 = predict(M5, validation)
 fitted_validation6 = predict(M6, validation)
-fitted_training1 = predict(M1)
-fitted_training2 = predict(M2)
-fitted_training3 = predict(M3)
-fitted_training4 = predict(M4)
-fitted_training5 = predict(M5)
-fitted_training6 = predict(M6)
 
 # Calculate the MSEs
-# Validation MSEs
-mse_v1 = mean((validation$Moisture-fitted_validation1)^2)
-mse_v2 = mean((validation$Moisture-fitted_validation2)^2)
-mse_v3 = mean((validation$Moisture-fitted_validation3)^2)
-mse_v4 = mean((validation$Moisture-fitted_validation4)^2)
-mse_v5 = mean((validation$Moisture-fitted_validation5)^2)
-mse_v6 = mean((validation$Moisture-fitted_validation6)^2)
 
 # Training MSEs
 mse_t1 = mean((training$Moisture-fitted_training1)^2)
@@ -76,37 +56,46 @@ mse_t3 = mean((training$Moisture-fitted_training3)^2)
 mse_t4 = mean((training$Moisture-fitted_training4)^2)
 mse_t5 = mean((training$Moisture-fitted_training5)^2)
 mse_t6 = mean((training$Moisture-fitted_training6)^2)
+mse_t = c(mse_t1, mse_t2, mse_t3, mse_t4, mse_t5, mse_t6) # vector of all MSEs for training
 
-# MSEs for validation and training
-mse_v = c(mse_v1, mse_v2, mse_v3, mse_v4, mse_v5, mse_v6)
-mse_t = c(mse_t1, mse_t2, mse_t3, mse_t4, mse_t5, mse_t6)
+# Validation MSEs
+mse_v1 = mean((validation$Moisture-fitted_validation1)^2)
+mse_v2 = mean((validation$Moisture-fitted_validation2)^2)
+mse_v3 = mean((validation$Moisture-fitted_validation3)^2)
+mse_v4 = mean((validation$Moisture-fitted_validation4)^2)
+mse_v5 = mean((validation$Moisture-fitted_validation5)^2)
+mse_v6 = mean((validation$Moisture-fitted_validation6)^2)
+mse_v = c(mse_v1, mse_v2, mse_v3, mse_v4, mse_v5, mse_v6) # vector of all MSEs for validation
 
-plot(1:6, mse_v, type="l", col="green", ylim=c(0,180))
-lines(1:6, mse_t, type="l", col="blue")
+# Plot the MSE's of the validation set compared to the training set
+plot(1:6, xlab="i", ylab="MSE", mse_t, type="l", col="green", ylim=c(20,45))
+lines(1:6, mse_v, type="l", col="blue")
+legend("topright", legend=c("Training (Green)", "Validation (Blue)"))
 
+# Create the formula where Fat is to be predicted by all the channels 1-100
 idx = !colnames(training) %in% c("Sample", "Fat", "Protein", "Moisture")
 formulax = paste("Fat~", paste(colnames(training[,idx]), collapse = "+"))
 
-#Task 4 - stepAIC
+#Task 4 - Reduce the linear model's features used to make prediction using stepAIC
 fit = lm(formula(formulax), data=dataframe)
 step = stepAIC(fit, direction="both", trace=FALSE)
 step$anova
 summary(step)
 
 # Task 5 - Ridge regression
-scaled_channels = scale(dataframe[,2:101])
-scaled_fat = scale(dataframe$Fat)
-model0_ridge = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=0, family="gaussian")
-plot(model0_ridge, xvar="lambda")
+scaled_channels = scale(dataframe[,2:101]) # centers/scales the values of the channels
+scaled_fat = scale(dataframe$Fat) # centers/scales the values of fat
+model0_ridge = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=0, family="gaussian") # calculate a model to predict fat with channels
+plot(model0_ridge, xvar="lambda") # plot of the coefficients values as compared to the log of λ, converges to 0 for larger λ
 
 # Task 6 - LASSO
-model0_lasso = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian")
-plot(model0_lasso, xvar="lambda")
+model0_lasso = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian") # calculate a model to predict fat with channels
+plot(model0_lasso, xvar="lambda",  xlim=c(-7,0), TRUE) # plot of the coefficient values as compared to the log of λ, converges to 0 but not as smoothly as ridge
 
-# Task 7 - Cross-validation LASSO
-model0_lasso_cv = cv.glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian", lambda=seq(0,1,0.001))
-plot(model0_lasso_cv, xvar="lambda", label=TRUE)
-model0_lasso_cv$lambda.min
+# Task 7 - Cross-validation LASSO, testing 1000 lambda from 0 (inclusive) to 1
+model0_lasso_cv = cv.glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian", lambda=seq(0,1,0.001)) # cross-validation
+plot(model0_lasso_cv, xvar="lambda", label=TRUE) # plot of the MSE of the cross-validation, follows the trend of the lasso model from 6 nicely
+
 
 
 
