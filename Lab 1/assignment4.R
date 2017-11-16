@@ -1,3 +1,5 @@
+# APPENDIX 3
+
 library(MASS)
 library(glmnet)
 # Data
@@ -7,7 +9,7 @@ dataframe = dataframe[-215,]
 # Task 1 - Plot Protein vs. Moisture
 protein = dataframe$Protein
 moisture = dataframe$Moisture
-plot(protein, moisture) # Plot of protein vs. moisture, linear approximation seems reasonable (normally distributed around a line)
+plot(protein, moisture, main="Moisture vs. Protein") # Plot of protein vs. moisture, linear approximation seems reasonable (normally distributed around a line)
 
 # Task 2
 # M1 = w0+w1*p+ε, where ε = N~(0, σ)
@@ -49,6 +51,8 @@ fitted_validation6 = predict(M6, validation)
 
 # Calculate the MSEs
 
+MSE = mean(())
+
 # Training MSEs
 mse_t1 = mean((training$Moisture-fitted_training1)^2)
 mse_t2 = mean((training$Moisture-fitted_training2)^2)
@@ -68,7 +72,7 @@ mse_v6 = mean((validation$Moisture-fitted_validation6)^2)
 mse_v = c(mse_v1, mse_v2, mse_v3, mse_v4, mse_v5, mse_v6) # vector of all MSEs for validation
 
 # Plot the MSE's of the validation set compared to the training set
-plot(1:6, xlab="i", ylab="MSE", mse_t, type="l", col="green", ylim=c(20,45))
+plot(1:6, xlab="Mi", ylab="MSE", mse_t, type="l", col="green", ylim=c(20,45), main="MSE for Trainign and Validation set")
 lines(1:6, mse_v, type="l", col="blue")
 legend("topright", legend=c("Training (Green)", "Validation (Blue)"))
 
@@ -86,15 +90,15 @@ summary(step)
 scaled_channels = scale(dataframe[,2:101]) # centers/scales the values of the channels
 scaled_fat = scale(dataframe$Fat) # centers/scales the values of fat
 model0_ridge = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=0, family="gaussian") # calculate a model to predict fat with channels
-plot(model0_ridge, xvar="lambda") # plot of the coefficients values as compared to the log of λ, converges to 0 for larger λ
+plot(model0_ridge, xvar="lambda", main="Ridge Regression") # plot of the coefficients values as compared to the log of λ, converges to 0 for larger λ
 
 # Task 6 - LASSO
 model0_lasso = glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian") # calculate a model to predict fat with channels
-plot(model0_lasso, xvar="lambda",  xlim=c(-7,0), TRUE) # plot of the coefficient values as compared to the log of λ, converges to 0 but not as smoothly as ridge
+plot(model0_lasso, xvar="lambda",  xlim=c(-7,0), TRUE, main="LASSO") # plot of the coefficient values as compared to the log of λ, converges to 0 but not as smoothly as ridge
 
 # Task 7 - Cross-validation LASSO, testing 1000 lambda from 0 (inclusive) to 1
 model0_lasso_cv = cv.glmnet(as.matrix(scaled_channels), scaled_fat, alpha=1, family="gaussian", lambda=seq(0,1,0.001)) # cross-validation
-plot(model0_lasso_cv, xvar="lambda", label=TRUE) # plot of the MSE of the cross-validation, follows the trend of the lasso model from 6 nicely
+plot(model0_lasso_cv, xvar="lambda", label=TRUE, main="Cross-Validation LASSO") # plot of the MSE of the cross-validation, follows the trend of the lasso model from 6 nicely
 
 
 

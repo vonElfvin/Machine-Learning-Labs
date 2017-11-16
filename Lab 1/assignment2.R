@@ -1,3 +1,5 @@
+# APPENDIX 2
+
 # returns the loglikelihood value for given θ and vector X
 loglikelihood = function(x, θ){
   return(length(x)*log(θ)-θ*sum(x))
@@ -40,8 +42,9 @@ for(i in 1:m){
 
 # Task 3
 # Plot the loglikelihoods for both all x values and first 6 for comparision
-plot(θ, loglikelihood_6, type="l", main="Dependence of Log-Likelihood and θ (n values)", xlab="θ", ylab="Log-Likelihood", col="green")
+plot(θ, loglikelihood_6, xlim=c(0,7), ylim=c(-60, 0), type="l", main="Dependence of Log-Likelihood and θ", xlab="θ", ylab="Log-Likelihood", col="green")
 lines(θ, loglikelihood_n, col="blue")
+legend("bottomright", legend=c("(green) loglikelihood for n values", "(blue) loglikelihood for n values"))
 
 # θ values for maximum loglikelihoods for all x values and first 6
 θstar_n = max_loglikelihood(X)
@@ -56,7 +59,7 @@ for(i in 1:m){
   log_bayesian_model[i] = log_bayesian(X, θ[i], λ)
 }
 # Plot the Bayesian Model
-plot(θ, log_bayesian_model, type="l", xlim=c(0,20), ylim=c(-500, 0), main="Bayesian model", xlab="θ", ylab="Log-Bayesian", col="green")
+plot(θ, log_bayesian_model, type="l", xlim=c(0,5), ylim=c(-500, 0), main="Dependance of l(θ) on θ", xlab="θ", ylab="l(θ)", col="green")
 θstar_b = max_bayesian(X, λ) # Calculate the argmax θ of the proportional probability
 
 # Task 5
