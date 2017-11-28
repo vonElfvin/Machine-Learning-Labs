@@ -11,7 +11,7 @@ ids = sample(1:n, n) # sample random order of data
 # Split the data into training/validation/training (50/25/25)
 training = dataframe[ids[1:floor(n/2)],] # 50% of the data
 validation = dataframe[ids[(floor(n/2)+1):floor(3*n/4)],] # 25% of data
-test = dataframe[ids[(floor(3*n/4)+1):n],] # the last 25% of the data
+test = dataframe[ids[(floor(3*n/4)+1):n],] # 25% of the data
 
 # Task 2
 fit_dt_dev = tree(good_bad~., data=training, split="deviance")
@@ -64,7 +64,7 @@ cm_dev_test_prun = table(fitted_pruned_tree_test, test[,20])
 # Missclassification rate for pruned tree on the TEST data
 mcr_dev_test_prun = 1-sum(diag(cm_dev_test_prun)/sum(cm_dev_test_prun)) #0.248
 
-# Task 4
+# Task 4 - Naive Bayes
 fit_naive_bayes =naiveBayes(good_bad~., data=training)
 fitted_training_naive_bayes = predict(fit_naive_bayes, newdata=training, type="class")
 fitted_test_naive_bayes = predict(fit_naive_bayes, newdata=test, type="class")
@@ -77,15 +77,11 @@ cm_naive_bayes_test = table(fitted_test_naive_bayes, test[,20])
 mcr_naive_bayes_training = 1-sum(diag(cm_naive_bayes_training))/sum(cm_naive_bayes_training) # 0.3
 mcr_naive_bayes_test = 1-sum(diag(cm_naive_bayes_test))/sum(cm_naive_bayes_test) # 0.3
 
-# Task 5  - FEL
-fit_naive_bayes_loss = naiveBayes(good_bad~., data=training)
-fitted_training_naive_bayes_loss = predict(fit_naive_bayes_loss, newdata=training, type="class")
-fitted_test_naive_bayes_loss = predict(fit_naive_bayes_loss, newdata=test, type="class")
+# Task 5 - Loss Matrix
+fitted_training_naive_bayes_prob = predict(fit_naive_bayes, newdata=training, type="raw")
+fitted_test_naive_bayes_prob = predict(fit_naive_bayes, newdata=test, type="raw")
 
 # Confusion matrixes
-cm_naive_bayes_training_loss  = table(fitted_training_naive_bayes_loss , training[,20])
-cm_naive_bayes_test_loss  = table(fitted_test_naive_bayes_loss , test[,20])
+cm_naive_bayes_training_loss_matrix = table(fitted_training_naive_bayes_prob[,1]>10/11, training[,20])
+cm_naive_bayes_test_loss_matrix = table(fitted_test_naive_bayes_prob[,1]>10/11, test[,20])
 
-# Missclassification rates
-mcr_naive_bayes_training_loss  = 1-sum(diag(cm_naive_bayes_training_loss ))/sum(cm_naive_bayes_training_loss ) # 0.3
-mcr_naive_bayes_test_loss  = 1-sum(diag(cm_naive_bayes_test_loss ))/sum(cm_naive_bayes_test_loss ) # 0.3
