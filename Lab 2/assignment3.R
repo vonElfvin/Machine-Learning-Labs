@@ -22,8 +22,8 @@ calculate_residuals = function(predictions, observations){
 }
 
 get_residuals = function(mle){
-  fitted0 = predict(mle, data.sorted)
-  return(calculate_residuals(fitted0, data.sorted$EX))
+  fitted = predict(mle, data.sorted)
+  return(calculate_residuals(fitted, data.sorted$EX))
 }
 
 fit_tree = function(in.data){
@@ -42,14 +42,28 @@ f2 = function(in.data){
   tree2 = fit_tree(in.data)
   pruned.tree2 = get_pruned_tree(tree2, 3)
   fitted2 = predict(pruned.tree2, newdata=data.sorted)
-  return(fitted)
+  return(fitted2)
+}
+
+f3 = function(in.data){
+  tree3 = fit_tree(in.data)
+  pruned.tree3 = get_pruned_tree(tree3, 3)
+  fitted3 = predict(pruned.tree3, newdata=data.sorted)
+  predicted3 = rnorm(n, fitted3, sd(get_residuals(mle)))
+  return(predicted3)
 }
 
 rng = function(in.data, mle){
   data = data.frame(EX=in.data$EX, MET=in.data$MET)
-  n=dim(data)[1]
   data$EX = rnorm(n, predict(mle, newdata=data), sd(get_residuals(mle)))
   return(data)
+}
+
+plot_confidence_band = function(w, e, fitted){
+  plot(data.sorted$MET, data.sorted$EX, col="blue", ylim=c(150, 475))
+  points(data.sorted$MET, fitted, type="l")
+  points(data.sorted$MET, e$point[2,], type="l", col="blue")
+  points(data.sorted$MET, e$point[1,], type="l", col="blue")
 }
 
 # Task 1
@@ -77,20 +91,27 @@ points(data.sorted$MET, data.sorted$EX, col="red")
 
 # Plot the residuals
 residuals = calculate_residuals(pruned.fitted, data.sorted$EX)
-hist(residuals, main="Residuals", xlab="Residual value", col="forestgreen", xlim=c(-125, 125))
+hist(residuals, main="Residuals", xlab="Residual value", col="forestgreen", xlim=c(-125, 125)) # normally distributed
 
 # Task 3 - TODO missing what is asked for
 set.seed(12345)
-w1 = boot(data.sorted, f1, R=50)
-hist(w1$t)
+w1 = boot(data.sorted, f1, R=1000)
+e1 = envelope(w1)
+plot_confidence_band(w1, e1, pruned.fitted)
 
-# Task 4 - TODO missing what is asked for, fix boot
+# Task 4 - TODO missing what is asked for
 set.seed(12345)
 mle = pruned.tree
-w2 = boot(data.sorted, statistic=f2, R=50, mle=mle, ran.gen=rng, sim="parametric")
-hist(w2$t)
+# Confidence band
+w2 = boot(data.sorted, statistic=f2, R=1000, mle=mle, ran.gen=rng, sim="parametric")
+e2 = envelope(w2)
+plot_confidence_band(w2, e2, pruned.fitted)
 
-
+# Prediction band
+set.seed(12345)
+w3 = boot(data.sorted, statistic=f3, R=1000, mle=mle, ran.gen=rng, sim="parametric")
+e3 = envelope(w3)
+plot_confidence_band(w3, e3, pruned.fitted)
 
 
 
