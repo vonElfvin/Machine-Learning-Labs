@@ -9,6 +9,8 @@ dataframe = read.csv2("NIRSpectra.csv")
 data = dataframe
 data$Viscosity = c()
 
+
+
 # Task 1 - Standard PCA
 pca = prcomp(data)
 # Eigenvalues
@@ -24,12 +26,16 @@ sum(var_props[1:2]) #= 99.5957 --> PC1 and PC2 count for 99.5957% of the variati
 # Scores - There seems to be least 2 unusual diesiel fuels according to this plot
 plot(pca$x[,1], pca$x[,2]) # 2 "strong" outliers, 5-7 "medium" outliers
 
+
+
 # Task 2 - Trace Plots
-U = pca$rotation
+U = pca$rotation # projected values
 
 # Tracing plots
 plot(U[,1], main="Traceplot for PC1", ylim=c(-0.11,0.11))
 plot(U[,2], main="Traceplot for PC2", ylim=c(-0.3, 0.3)) # the last few original feutures mainly explain this PC
+
+
 
 # Task 3 - ICA
 set.seed(12345)
@@ -40,6 +46,8 @@ plot(Wtick[,2], main="Traceplot, W' column 2", ylim=c(-11,11)) # the "opposite" 
 
 # Scores
 plot(ica$S[,1], ica$S[,2]) # ICA, 
+
+
 
 # Task 4 - PCR
 set.seed(12345)
