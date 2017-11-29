@@ -46,7 +46,6 @@ mcr.gini.test = 1-sum(diag(cm.gini.test))/sum(cm.gini.test) # 0.304
 
 
 # Task 3 - Tree Pruning
-
 # Empty vectors of score
 score.training = rep(0,14)
 score.validation = rep(0,14)
