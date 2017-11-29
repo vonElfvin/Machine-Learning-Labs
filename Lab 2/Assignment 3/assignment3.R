@@ -1,4 +1,4 @@
-# Attachmed 2
+# Appendix 2
 
 # Libraries
 library(tree)
@@ -73,8 +73,8 @@ rng = function(in.data, mle){
 }
 
 # Plots the confidence band of given envelope and predictions
-plot_confidence_band = function(e, fitted){
-  plot(data.sorted$MET, data.sorted$EX, col="blue", ylim=c(150, 475))
+plot_confidence_band = function(e, fitted, main){
+  plot(data.sorted$MET, data.sorted$EX, col="blue", ylim=c(150, 475), main=main, xlab="MET", ylab="EX")
   points(data.sorted$MET, fitted, type="l")
   points(data.sorted$MET, e$point[2,], type="l", col="blue")
   points(data.sorted$MET, e$point[1,], type="l", col="blue")
@@ -83,8 +83,7 @@ plot_confidence_band = function(e, fitted){
 
 
 # Task 1 - Plot EX vs. MET
-plot(data.sorted$MET, data.sorted$EX, ylim=c(0,450), xlim=c(0,100)) # Some sort of regressional model, 2nd polynomial
-
+plot(data.sorted$MET, data.sorted$EX, xlab="MET", ylab="EX", main="EX vs. MET") # Some sort of regressional model, 2nd polynomial
 
 
 # Task 2
@@ -96,18 +95,23 @@ set.seed(12354)
 cv.fit.tree = cv.tree(fit.tree)
 
 # Plot deviations compared to size=# of leaves & dev compared to k = value of cost-complexity pruning parameter of each tree
-plot(cv.fit.tree$size, cv.fit.tree$dev, type="b", col="forestgreen") # size=3 leaves gives minimum deviance
-plot(log(cv.fit.tree$k), cv.fit.tree$dev, type="b", col="forestgreen") # k=160486 leaves gives minimum deviance
+plot(cv.fit.tree$size, cv.fit.tree$dev, type="b", col="forestgreen", 
+     main="Deviance vs. # of leaves", xlab="# of leaves", ylab="Deviance") # size=3 leaves gives minimum deviance
+plot(log(cv.fit.tree$k), cv.fit.tree$dev, type="b", col="forestgreen", 
+     main="Deviance vs Cost-Complexity", xlab="Cost-Complexity", ylab="Deviance") # k=160486 leaves gives minimum deviance
 
 # Generate final tree, 3 leaves chosen
 pruned.tree = get_pruned_tree(fit.tree, 3)
+plot(pruned.tree)
+text(pruned.tree, pretty=0)
 
 # Make predictions
 pruned.fitted = predict(pruned.tree, newdata=data.sorted)
 
 # Plot predictions and actual values
-plot(data.sorted$MET, pruned.fitted, col="blue")
-points(data.sorted$MET, data.sorted$EX, col="red")
+plot(data.sorted$MET, data.sorted$EX, col="blue" , xlab="MET", ylab="EX", main="EX vs. MET")
+points(data.sorted$MET, pruned.fitted, col="red")
+legend("topright", legend=c("Fitted Data", "Original Data"), lty=1, col=c("red", "blue"))
 
 # Plot the residuals
 residuals = calculate_residuals(pruned.fitted, data.sorted$EX)
@@ -119,7 +123,7 @@ hist(residuals, main="Residuals", xlab="Residual value", col="forestgreen", xlim
 set.seed(12345)
 boot1 = boot(data.sorted, f1, R=1000)
 e1 = envelope(boot1)
-plot_confidence_band(e1, pruned.fitted)
+plot_confidence_band(e1, pruned.fitted, "Confidence band for Non-Parametic Bootstrap")
 
 
 
@@ -129,13 +133,13 @@ mle = pruned.tree
 # Confidence band
 boot2 = boot(data.sorted, statistic=f2, R=1000, mle=mle, ran.gen=rng, sim="parametric")
 e2 = envelope(boot2)
-plot_confidence_band(w2, e2, pruned.fitted)
+plot_confidence_band(e2, pruned.fitted, "Confidence band for Parametic Bootstrap")
 
 # Prediction band
 set.seed(12345)
 boot3 = boot(data.sorted, statistic=f3, R=1000, mle=mle, ran.gen=rng, sim="parametric")
 e3 = envelope(boot3)
-plot_confidence_band(w3, e3, pruned.fitted)
+plot_confidence_band(e3, pruned.fitted, "Prediction band for Parametic Bootstrap")
 
 
 

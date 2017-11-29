@@ -1,4 +1,4 @@
-# Appendix 2
+# Appendix 1
 
 # Libraries
 library(tree)
@@ -11,8 +11,6 @@ n = dim(dataframe)[1]
 set.seed(12345)
 ids = sample(1:n, n) # sample random order of data
 
-
-
 # Task 1 - Split the data into training/validation/training (50/25/25) 
 training = dataframe[ids[1:floor(n/2)],]                  # 50% of the data
 validation = dataframe[ids[(floor(n/2)+1):floor(3*n/4)],] # 25% of data
@@ -23,10 +21,10 @@ test = dataframe[ids[(floor(3*n/4)+1):n],]                # 25% of the data
 tree.deviance = tree(good_bad~., data=training, split="deviance")
 tree.gini = tree(good_bad~., data=training, split="gini")
 
-# plot(fit_dt_dev)
-# text(fit_dt_dev, pretty=0)
-# plot(fit_dt_gini)
-# text(fit_dt_gini, pretty=0)
+# plot(tree.deviance)
+# text(tree.deviance, pretty=0)
+# plot(tree.gini)
+# text(tree.gini, pretty=0)
 
 # Fit Test Data
 fitted.deviance.test = predict(tree.deviance, test, type="class")
@@ -59,13 +57,14 @@ for(i in 2:14){
 }
 
 # Plot the deviances for each number of leaves
-plot(2:14, score.training[2:14], type="b", col="green", xlab="# of leaves", ylab="deviance", ylim=c(250, 600), main="Deviance based on # of leaves")
+plot(2:14, score.training[2:14], type="b", col="green", 
+     xlab="# of leaves", ylab="deviance", ylim=c(250, 600), main="Deviance based on # of leaves")
 points(2:14, score.validation[2:14], type="b", col="blue")
 legend("topright", legend=c("Train Score", "Validation Score"), lty=1, col=c("green","blue"))
 
-# Optimal leaves = 4, depth=3 or 4, var=savings, duration, history
+# Optimal leaves = 4, depth=3, var=savings, duration, history
 pruned.tree = prune.tree(tree.deviance, best=4)
-plot(pruned.tree)
+plot(pruned.tree, main="Pruned tree with 4 leaves")
 text(pruned.tree, pretty=0)
 
 # Predictions, Confusion matrix and lastly Missclassification rate for pruned tree on test data
@@ -97,6 +96,6 @@ fitted.naive.bayes.training.raw = predict(naive.bayes, newdata=training, type="r
 fitted.naive.bayes.test.raw = predict(naive.bayes, newdata=test, type="raw")
 
 # Confusion matrixes
-cm.naive.bayes.training.loss.matrix = table(fitted.naive.bayes.training.raw[,1]>10/11, training[,20])
-cm.naive.bayes.test.loss.matrix = table(fitted.naive.bayes.test.raw[,1]>10/11, test[,20])
+cm.naive.bayes.training.loss.matrix = table(fitted.naive.bayes.training.raw[,2]>10/11, training[,20])
+cm.naive.bayes.test.loss.matrix = table(fitted.naive.bayes.test.raw[,2]>10/11, test[,20])
 
