@@ -65,7 +65,8 @@ f3 = function(in.data){
   return(predicted3)
 }
 
-# Returns data with values "moved" around under the assumption that Y~N(µi, sigma^2)
+# Returns data with EX values replaced with their prediction based on given MET
+# The predictio is "moved" around under the assumption that Y~N(µi, sigma^2)
 rng = function(in.data, mle){
   data = data.frame(EX=in.data$EX, MET=in.data$MET)
   data$EX = rnorm(n, predict(mle, newdata=data), sd(get_residuals(mle)))
