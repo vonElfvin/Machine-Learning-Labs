@@ -66,7 +66,7 @@ list_result = ROC(test[,49], Prob_k5, p_seq) # list of TPR and FPR values for ea
 list_result_kknn = ROC(test[,49], Prob_k5_kknn$fitted.values, p_seq) # list of TPR and FPR values for each probabilty p
 
 # Roc Curves
-plot(x=list_result$FPR, y=list_result$TPR, xlab="FPR", ylab="TPR", main="ROC Curves", xlim=c(0,1), ylim=c(0,1), type="l", col="blue") # ROC curve for knearest
+plot(x=list_result$FPR, y=list_result$TPR, xlab="FPR", ylab="TPR", main="ROC Curves", xlim=c(0,1), ylim=c(0,1), type="l", col="blue")   b # ROC curve for knearest
 legend("topright", legend=c("(blue) knearest, k=5", "(green) kknn, k=5"))
 lines(x=list_result_kknn$FPR, y=list_result_kknn$TPR, type="l", col="green") # ROC curve for kknn
 
